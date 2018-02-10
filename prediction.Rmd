@@ -15,7 +15,7 @@ In order to generate our models we will need several packages. The first package
 
 There are many prediction packages available and they all have slightly different syntax. caret is a package that brings all the different algorithms under one hood using the same syntax. 
 
-We will also be accessing an algorithm from the [Weka suite](https://www.cs.waikato.ac.nz/~ml/weka/). Weka is a collection of machine learning algorithms that have been implemented in Java and made freely available by the University of Waikato in New Zealand. To access these algorithms you will need to first install both the [Java Runtime Environment (JRE) and Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads/jre9-downloads-3848532.html) on your machine. You can then then install the [RWeka](https://cran.r-project.org/web/packages/RWeka/index.html) package within R.
+We will also be accessing an algorithm from the [Weka suite]. Weka is a collection of machine learning algorithms that have been implemented in Java and made freely available by the University of Waikato in New Zealand. To access these algorithms you will need to first install both the [Java Runtime Environment (JRE) and Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads/jre9-downloads-3848532.html) on your machine. You can then then install the [RWeka](https://cran.r-project.org/web/packages/RWeka/index.html) package within R.
 
 (Issue 1: failure to install RWeka/RWekajars, paste "sudo R CMD javareconf" into terminal and try to install again)
 
@@ -28,14 +28,21 @@ The data comes from a university registrar's office. The code book for the varia
 Upload the drop-out.csv data into R as a data frame. 
 
 ```{r}
-Drop <- read.csv("drop-out.csv")
+library("tidyverse")
+library("lattice")
+library("caret")
+library("RWeka")
+library("C50")
+D1 <- read.csv("drop-out.csv")
 ```
 
 The next step is to separate your data set into a training set and a test set. Randomly select 25% of the students to be the test data set and leave the remaining 75% for your training data set. (Hint: each row represents an answer, not a single student.)
 
 ```{r}
-mysample <- Drop[sample(1:nrow(Drop),1464,replace = FALSE),]
-
+#filter function in dplyr packages. dplyr is part of tidyverse.
+D2<-D1 %>%
+filter(student_id %in% sample(unique(student_id),ceiling(0.75*length(unique(student_id)))))
+#Now how can I subset the rest of 25% out?#
 ```
 
 For this assignment you will be predicting the student level variable "complete". 
