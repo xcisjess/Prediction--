@@ -11,7 +11,7 @@ In this assignment we will be using the tree algorithms to build models of which
 
 ## Software
 
-In order to generate our models we will need several packages. The first package you should install is [caret](https://cran.r-project.org/web/packages/caret/index.html).
+In order to generate our models we will need several packages. The first package you should install is [caret]().
 
 There are many prediction packages available and they all have slightly different syntax. caret is a package that brings all the different algorithms under one hood using the same syntax. 
 
@@ -28,13 +28,13 @@ The data comes from a university registrar's office. The code book for the varia
 Upload the drop-out.csv data into R as a data frame. 
 
 ```{r}
-
+Drop <- read.csv("drop-out.csv")
 ```
 
 The next step is to separate your data set into a training set and a test set. Randomly select 25% of the students to be the test data set and leave the remaining 75% for your training data set. (Hint: each row represents an answer, not a single student.)
 
 ```{r}
-
+mysample <- Drop[sample(1:nrow(Drop),1464,replace = FALSE),]
 
 ```
 
