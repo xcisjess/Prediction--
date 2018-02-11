@@ -40,8 +40,8 @@ The next step is to separate your data set into a training set and a test set. R
 
 ```{r}
 #filter function in dplyr packages. dplyr is part of tidyverse.
-D2<-D1 %>%
-filter(student_id %in% sample(unique(student_id),ceiling(0.75*length(unique(student_id)))))
+library("dplyr")
+D2<-D1 %>% filter(student_id %in% sample(unique(student_id), ceiling(0.75*length(unique(student_id)))))
 #Now how can I subset the rest of 25% out?#
 ```
 
@@ -51,6 +51,11 @@ For this assignment you will be predicting the student level variable "complete"
 Visualize the relationships between your chosen variables as a scatterplot matrix.  Save your image as a .pdf named scatterplot_matrix.pdf. Based on this visualization do you see any patterns of interest? Why or why not?
 
 ```{r}
+# Scatterplot Matrix? I'm wondering that is it only continuous variable can be used in scatterplot???
+# Basic Scatterplot Matrix
+pairs(~years+entrance_test_score+enroll_date_time+complete,data=D2, 
+   main="Simple Scatterplot Matrix")
+
 
 ```
 
@@ -63,6 +68,7 @@ Construct a classification tree that predicts complete using the caret package.
 ```{r}
 library(caret)
 
+TRAIN1 <- D2
 TRAIN2 <- TRAIN1[,c(2:10)] #Remove the student_id variable that we do not want to use in the model
 
 #Define the control elements we would like to use
