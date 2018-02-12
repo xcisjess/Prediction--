@@ -28,11 +28,6 @@ The data comes from a university registrar's office. The code book for the varia
 Upload the drop-out.csv data into R as a data frame. 
 
 ```{r}
-library("tidyverse")
-library("lattice")
-library("caret")
-library("RWeka")
-library("C50")
 D1 <- read.csv("drop-out.csv")
 ```
 
@@ -41,8 +36,12 @@ The next step is to separate your data set into a training set and a test set. R
 ```{r}
 #filter function in dplyr packages. dplyr is part of tidyverse.
 library("dplyr")
-D2<-D1 %>% filter(student_id %in% sample(unique(student_id), ceiling(0.75*length(unique(student_id)))))
-#Now how can I subset the rest of 25% out?#
+D2<-D1 %>%
+  filter(student_id %in% sample(unique(D1$student_id), ceiling(0.75*length(unique(D1$student_id)))))
+TRAIN1 <- D2
+#Now how can I subset the rest of 25% out? We need to split the original database into training set and test set, which are mutally exculsive to each other! tidyr cheat sheet on how to combine data set.#
+D3 <- anti_join(D1, D2, by = "student_id")
+TEST1 <- D3
 ```
 
 For this assignment you will be predicting the student level variable "complete". 
@@ -51,11 +50,15 @@ For this assignment you will be predicting the student level variable "complete"
 Visualize the relationships between your chosen variables as a scatterplot matrix.  Save your image as a .pdf named scatterplot_matrix.pdf. Based on this visualization do you see any patterns of interest? Why or why not?
 
 ```{r}
-# Scatterplot Matrix? I'm wondering that is it only continuous variable can be used in scatterplot???
+# Scatterplot Matrix? I'm wondering that is it only continuous variable can be used in scatterplot??? 
+# The pdf has been saved contains nothing.
 # Basic Scatterplot Matrix
-pairs(~years+entrance_test_score+enroll_date_time+complete,data=D2, 
+library(ggplot2)
+pairs(~years+entrance_test_score+enroll_date_time+complete,data=D2,
    main="Simple Scatterplot Matrix")
-
+pdf("scatterplot_matrix.pdf")
+print(qplot("Simple Scatterplot Matrix"))
+dev.off()
 
 ```
 
@@ -68,7 +71,6 @@ Construct a classification tree that predicts complete using the caret package.
 ```{r}
 library(caret)
 
-TRAIN1 <- D2
 TRAIN2 <- TRAIN1[,c(2:10)] #Remove the student_id variable that we do not want to use in the model
 
 #Define the control elements we would like to use
@@ -100,6 +102,7 @@ What does the plot represent? What information does this plot tell us?
 Now predict results from the test data and describe import attributes of this test. Do you believe it is a successful model of student performance, why/why not?
 
 ```{r}
+library("e1071")
 TEST2 <- TEST1[,c(2:10)] #Remove the student_id variable that we do not want to use in the model
 
 #Generate prediction using previously trained model
@@ -118,6 +121,10 @@ How does the C4.5 algorithm differ from the CART algorithm?
 
 Train the J48 model on the same training data and examine your results.
 ```{r}
+##Is there other way to represent the reslut? plot is horrible
+library(RWeka)
+ m1 <- J48(complete~., data = TRAIN2)
+ if(require("party", quietly = TRUE))
 
 ```
 Describe important model attribues of your tree. Do you believe it is a successful model of student performance, why/why not?
@@ -127,7 +134,8 @@ What does the plot represent? What information does this plot tell us?
 Now test your new J48 model by predicting the test data and generating model fit statistics.
 
 ```{r}
-
+m2 <- J48(complete~., data = TEST2)
+ if(require("party", quietly = TRUE)) plot(m2)
 
 ```
 
@@ -136,7 +144,10 @@ There is an updated version of the C4.5 model called C5.0, it is implemented in 
 Install the C50 package, train and then test the C5.0 model on the same data.
 
 ```{r}
-
+library(C50)
+TRAINSC50 <- C5.0(TRAIN2[,-4],TRAIN2[,4])
+p <- predict.C5.0(TEST2$complete)
+table(TEST2[,4],predicted=p)
 ```
 
 ## Compare the models
