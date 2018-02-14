@@ -174,7 +174,7 @@ Install the C50 package, train and then test the C5.0 model on the same data.
 library(C50)
 ctrl3 <- trainControl(method = "repeatedcv",
               number = 10,
-              repeats = 10, 
+              repeats = 3, 
               returnResamp="all")
 grid <- expand.grid( .winnow = c(TRUE,FALSE), .trials= 14, .model="tree" )
 
@@ -189,6 +189,14 @@ C50Fit <- train(complete ~ .,
 
 plot(C50Fit)
 
+library("e1071")
+#Generate prediction using previously trained model
+C50Classes <- predict(C50Fit, newdata = TEST2)
+
+#Generate model statistics
+confusionMatrix(data = C50Classes, TEST2$complete)
+
+
 ```
 
 ## Compare the models
@@ -196,7 +204,7 @@ plot(C50Fit)
 caret allows us to compare all three models at once.
 
 ```{r}
-resamps <- resamples(list(cart = cartFit, jfoureight = j48Fit, cfiveo = c50Fit))
+resamps <- resamples(list(cart = cartFit, jfoureight = j48Fit, cfiveo = C50Fit))
 summary(resamps)
 ```
 
