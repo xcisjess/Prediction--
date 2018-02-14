@@ -74,7 +74,7 @@ library(caret)
 TRAIN2 <- TRAIN1[,c(2:10)] #Remove the student_id variable that we do not want to use in the model
 
 #Define the control elements we would like to use
-ctrl <- trainControl(method = "repeatedcv", #Tell caret to perform 10-fold cross validation
+ctrl1 <- trainControl(method = "repeatedcv", #Tell caret to perform 10-fold cross validation
                 repeats = 3, #Tell caret to repeat each fold three times
                 classProbs = TRUE, #Calculate class probabilities for ROC calculation
                 summaryFunction = twoClassSummary)
@@ -82,7 +82,7 @@ ctrl <- trainControl(method = "repeatedcv", #Tell caret to perform 10-fold cross
 #Define the model
 cartFit <- train(complete ~ ., #Define which variable to predict 
                 data = TRAIN2, #Define the data set to train the model on
-                trControl = ctrl, #Tell caret the control elements
+                trControl = ctrl1, #Tell caret the control elements
                 method = "rpart", #Define the model type
                 metric = "ROC", #Tell caret to calculate the ROC curve
                 preProc = c("center", "scale")) #Center and scale the data to minimize the 
@@ -98,8 +98,10 @@ plot(cartFit)
 Describe important model attribues of your tree. Do you believe it is a successful model of student performance, why/why not?
 
 What does the plot represent? What information does this plot tell us?
+The plot represent the results of average resampled estimates of rpart model. It tells us the model is optimal when cp = 0.008118081. According to the plots, when cp is about 0.03, ROC drops to 0.85, the validity of the model severely decreases when the model become more complex.
 
 Now predict results from the test data and describe import attributes of this test. Do you believe it is a successful model of student performance, why/why not?
+From the accuracy of the predication it is a successful model. However, it fails to predict the "no" situation because about half of student who with data"no" has been predicted into "yes". 
 
 ```{r}
 library("e1071")
@@ -123,19 +125,44 @@ Train the J48 model on the same training data and examine your results.
 ```{r}
 ##Is there other way to represent the reslut? plot is horrible
 library(RWeka)
- m1 <- J48(complete~., data = TRAIN2)
- if(require("party", quietly = TRUE))
+ #Define the control elements we would like to use
+ctrl2 <- trainControl(method = "repeatedcv", #Tell caret to perform 10-fold cross validation
+                repeats = 3, #Tell caret to repeat each fold three times
+                classProbs = TRUE, #Calculate class probabilities for ROC calculation
+                summaryFunction = twoClassSummary)
+
+#Define the model
+j48Fit <- train(complete ~ ., #Define which variable to predict 
+                data = TRAIN2, #Define the data set to train the model on
+                trControl = ctrl2, #Tell caret the control elements
+                method = "J48", #Define the model type
+                metric = "ROC", #Tell caret to calculate the ROC curve
+                preProc = c("center", "scale")) #Center and scale the data to minimize the 
+
+#Check the results
+j48Fit
+                
+#Plot ROC against complexity 
+plot(j48Fit)
 
 ```
+
+
 Describe important model attribues of your tree. Do you believe it is a successful model of student performance, why/why not?
 
 What does the plot represent? What information does this plot tell us?
 
+
 Now test your new J48 model by predicting the test data and generating model fit statistics.
 
 ```{r}
-m2 <- J48(complete~., data = TEST2)
- if(require("party", quietly = TRUE)) plot(m2)
+library("e1071")
+#Generate prediction using previously trained model
+j48Classes <- predict(j48Fit, newdata = TEST2)
+
+#Generate model statistics
+confusionMatrix(data = j48Classes, TEST2$complete)
+
 
 ```
 
@@ -145,9 +172,23 @@ Install the C50 package, train and then test the C5.0 model on the same data.
 
 ```{r}
 library(C50)
-TRAINSC50 <- C5.0(TRAIN2[,-4],TRAIN2[,4])
-p <- predict.C5.0(TEST2$complete)
-table(TEST2[,4],predicted=p)
+ctrl3 <- trainControl(method = "repeatedcv",
+              number = 10,
+              repeats = 10, 
+              returnResamp="all")
+grid <- expand.grid( .winnow = c(TRUE,FALSE), .trials= 14, .model="tree" )
+
+C50Fit <- train(complete ~ ., 
+                data = TRAIN2, 
+                trControl = ctrl3, 
+                tuneGrid = grid,
+                method = "C5.0", 
+                metric = "Accuracy", 
+                preProc = c("center", "scale"),
+                verbose = FALSE) 
+
+plot(C50Fit)
+
 ```
 
 ## Compare the models
